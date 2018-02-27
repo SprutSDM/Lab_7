@@ -12,7 +12,7 @@ def client_handler(sock, address, port):
         try:
             data = sock.recv(1024)
             print(data)
-            logging.debug('Recv: ' + data + ' from ' + adress + ':' + port)
+            logging.debug('Recv: ' + str(data) + ' from ' + address + ':' + str(port))
         except OSError:
             break
         
@@ -25,10 +25,10 @@ def client_handler(sock, address, port):
             if sent_len == len(data):
                 break
             sent_data = sent_data[sent_len:]
-        logging.debug('Send: ' + data + ' from ' + adress + ':' + port)
+        logging.debug('Send: ' + str(data) + ' from ' + address + ':' + str(port))
     
     sock.close()
-    logging.debug('Bye-bye: ' + adress + ':' + port)
+    logging.debug('Bye-bye: ' + address + ':' + str(port))
 
 def main(host='localhost', port=9090):
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,13 +38,13 @@ def main(host='localhost', port=9090):
     while True:
         try:
             client_sock, (client_address, client_port) = serversocket.accept()
-            logging.debug('New client ' + adress + ':' + port)
+            logging.debug('New client ' + client_address + ':' + str(port))
             client_thread = threading.Thread(target=client_handler,
                             args=(client_sock, client_address, client_port))   
-            client_thread.daemon = True
+            client_thread.daemon = False
             client_thread.start()
         except:
-            pass
+            pass        
 
 if __name__ == '__main__':
     main()
