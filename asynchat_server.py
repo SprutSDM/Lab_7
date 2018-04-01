@@ -10,6 +10,10 @@ import urllib
 import argparse
 from time import strftime, gmtime
 
+path_400 = '404/index.html'
+path_403 = '404/index.html'
+path_404 = '404/index.html'
+paht_405 = '404/index.html'
 
 def url_normalize(path):
     if path.startswith("."):
@@ -152,7 +156,7 @@ class AsyncHTTPRequestHandler(asynchat.async_chat):
         self.send_header('Content-Type', 'text/plain')
         self.send_header('Connection', 'close')
         self.end_headers()
-
+        
     def send_response(self, code, message=None):
         if message is None:
             if code in self.responses:
@@ -171,31 +175,36 @@ class AsyncHTTPRequestHandler(asynchat.async_chat):
         return strftime('%a, %d %b %Y %H:%M:%S GTM', gmtime())
 
     def send_head(self):
+        code = None
         path = self.translate_path(self.request_uri)
         if path == '' or os.path.isdir(path):
             print('Path found! -', path)
             path = os.path.join(path, 'index.html')
             if not os.path.exists(path):
+                f = open(path_404, encoding='utf8')
                 print("File doesn't exist :( -", path)
                 self.send_response(403)
-                self.handle_close()
-                return None
+                code = 403
+                path = path_403
             else:
                 print('File is here! -', path)
         else:
             print('Path not found :( -', path)
         print('Finaly path -', path)
         print()
-        try:
-            f = open(path, encoding='utf8')
-        except IOError:
-            self.send_response(404)
-            self.handle_close()
-            return None
+        if code is None:
+            try:
+                f = open(path, encoding='utf8')
+            except IOError:
+                f = open(path_404, encoding='utf8')
+                print('IOError! -', path)
+                self.send_response(404)
+                code = 404
+                path = path_404
         
         _, ext = os.path.splitext(path)
         ctype = mimetypes.types_map[ext.lower()]
-        self.send_response(200)
+        self.send_response(code or 200)
         self.send_header('Content-Type', ctype)
         self.send_header('Content-Length', os.path.getsize(path))
         self.end_headers()
