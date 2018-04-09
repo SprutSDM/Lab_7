@@ -42,6 +42,7 @@ class AsyncWSGIRequestHandler(asynchat_server.AsyncHTTPRequestHandler):
         self.finish_response(result)
 
     def finish_response(self, result):
+        print(result)
         [body] = result
         print(body)
         self.send(body)
